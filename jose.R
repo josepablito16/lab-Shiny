@@ -1,16 +1,13 @@
+require(plotly)
+library(lubridate)
 accidentes<-read.csv("./Data/HechoTransito.csv",header = TRUE,sep=",")
 accidentesPorMes<-as.data.frame(table(accidentes$mes_ocu,accidentes$año_ocu))
 accidentesPorMes<-accidentesPorMes[with(accidentesPorMes,order(accidentesPorMes$Var2)),]
 
-
-
-require(plotly)
-library(lubridate)
+ll.smooth = loess(y~x, span=0.3,data.frame(x=as.integer(rownames(accidentesPorMes)),y=accidentesPorMes$Freq))
 
 #p.glob = plot_ly(x=as.integer(rownames(accidentesPorMes)), y=accidentesPorMes$Freq, type="scatter", mode="markers", line=data.fmt, name="Data")
-p.glob = plot_ly(x=c(accidentesPorMes$Var2,accidentesPorMes$Var1), y=accidentesPorMes$Freq, type="scatter", mode="markers", line=data.fmt, name="Data")
-#p.glob = add_lines(p.glob, x=tt, y=predict(m1), line=line.fmt, name="Linear")
-#p.glob = add_lines(p.glob, x=tt, y=predict(m2), line=line.fmt, name="Quadratic")
-#p.glob = add_lines(p.glob, x=tt, y=predict(m3), line=line.fmt, name="Cubic")
-#p.glob = layout(p.glob, title = "Global smoothers")
+p.glob = plot_ly(x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=accidentesPorMes$Freq, type="scatter", mode="markers", line=data.fmt, name="Data")
+p.glob = add_lines(p.glob, x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=predict(ll.smooth), line=line.fmt, name="Span = 0.75")
+p.glob = layout(p.glob, title = "Global smoothers")
 print(p.glob)
