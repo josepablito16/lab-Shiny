@@ -1,0 +1,7 @@
+/diccionarios/
+/txts/
+/zips/
+/xlsx/*
+*.csv
+*.RData
+*.xlsx
