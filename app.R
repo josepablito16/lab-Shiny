@@ -31,7 +31,20 @@ ui <- dashboardPage(
       
       # Tab de proyecciones
       tabItem(tabName = "proyecciones",
-              h2("Proyecciones")
+              h2("Proyecciones"),
+              fluidRow(
+                box(
+                  plotOutput("", height = 250),
+                )
+              ),
+              fluidRow(
+                box(
+                  plotOutput("", height = 250)
+                ),
+                box(
+                  plotlyOutput("plotAccidentes", height = 250)
+                )
+              )
       )
     )
   )
@@ -44,6 +57,26 @@ server <- function(input, output) {
   output$plot1 <- renderPlot({
     data <- histdata[seq_len(input$slider)]
     hist(data)
+  })
+  
+  # Grafica de Jose
+  output$plotAccidentes <- renderPlotly({
+    require(plotly)
+    library(lubridate)
+    accidentes<-read.csv("./Data/HechoTransito.csv",header = TRUE,sep=",")
+    accidentesPorMes<-as.data.frame(table(accidentes$mes_ocu,accidentes$año_ocu))
+    accidentesPorMes<-accidentesPorMes[with(accidentesPorMes,order(accidentesPorMes$Var2)),]
+    
+    data.fmt = list(color=rgb(0.8,0.8,0.8,0.8), width=4)
+    line.fmt = list(dash="solid", width = 1.5, color=NULL)
+    
+    ll.smooth = loess(y~x, span=0.3,data.frame(x=as.integer(rownames(accidentesPorMes)),y=accidentesPorMes$Freq))
+    
+    #p.glob = plot_ly(x=as.integer(rownames(accidentesPorMes)), y=accidentesPorMes$Freq, type="scatter", mode="markers", line=data.fmt, name="Data")
+    p.glob = plot_ly(x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=accidentesPorMes$Freq, type="scatter", mode="markers", line=data.fmt, name="Data")
+    p.glob = add_lines(p.glob, x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=predict(ll.smooth), line=line.fmt, name="LOESS(0.3)")
+    p.glob = layout(p.glob, title = "Accidentes de motos por mes")
+    plot1<-p.glob
   })
 }
 
