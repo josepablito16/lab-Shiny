@@ -11,6 +11,6 @@ ll.smooth = loess(y~x, span=0.3,data.frame(x=as.integer(rownames(accidentesPorMe
 
 #p.glob = plot_ly(x=as.integer(rownames(accidentesPorMes)), y=accidentesPorMes$Freq, type="scatter", mode="markers", line=data.fmt, name="Data")
 p.glob = plot_ly(x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=accidentesPorMes$Freq, type="scatter", mode="markers", line=data.fmt, name="Data")
-p.glob = add_lines(p.glob, x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=predict(ll.smooth), line=line.fmt, name="Span = 0.75")
+p.glob = add_lines(p.glob, x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=predict(ll.smooth), line=line.fmt, name="Span = 0.3")
 p.glob = layout(p.glob, title = "Global smoothers")
 print(p.glob)
