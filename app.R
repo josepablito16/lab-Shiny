@@ -1,5 +1,10 @@
 ## app.R ##
 library(shinydashboard)
+library(shiny)
+library(shinyWidgets)
+library(plotly)
+library(dplyr)
+library(lubridate)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Laboratorio 9"),
@@ -39,10 +44,18 @@ ui <- dashboardPage(
               ),
               fluidRow(
                 box(
-                  plotOutput("", height = 250)
+                  plotOutput("distPlot", height = 250),
+                  sidebarPanel(
+                    setSliderColor(c("DeepPink ", "#FF4500"), c(1, 2, 4)),
+                    sliderInput("span", 
+                                "Suavizado", 
+                                min = 0.1,
+                                max = 0.5, 
+                                value = 0.3),
+                  )
                 ),
                 box(
-                  plotlyOutput("plotAccidentes", height = 250)
+                  plotlyOutput("plotAccidentes", height =410,width = "100%")
                 )
               )
       )
@@ -51,8 +64,6 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
-  library(plotly)
-  library(lubridate)
   set.seed(122)
   histdata <- rnorm(500)
   
@@ -77,6 +88,19 @@ server <- function(input, output) {
     p.glob = add_lines(p.glob, x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=predict(ll.smooth), line=line.fmt, name="LOESS(0.3)")
     p.glob = layout(p.glob, title = "Accidentes de motos por mes")
     plot1<-p.glob
+  })
+  
+  output$distPlot <- renderPlot({
+    accidentes<-read.csv("./Data/FallecidosLesionados.csv",header = TRUE,sep=",")
+    accidentes <- filter(accidentes,accidentes$año_ocu >= 2016)
+    
+    accidentesPorMes<-as.data.frame(table(accidentes$mes_ocu,accidentes$año_ocu))
+    accidentesPorMes<-accidentesPorMes[with(accidentesPorMes,order(accidentesPorMes$Var2)),]
+    
+    loessMod30 = loess(y~x, span=input$span,data.frame(x=as.integer(rownames(accidentesPorMes)),y=accidentesPorMes$Freq))
+    smoothed30 <- predict(loessMod30)
+    plot(x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=accidentesPorMes$Freq, type="l", main="Predicción accidentes fatales (2016-2019) ", xlab="Fecha", ylab="Cantidad de accidentes")
+    lines(smoothed30, x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), col="red")
   })
 }
 

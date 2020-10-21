@@ -6,13 +6,13 @@ shinyUI(pageWithSidebar(
   
   #Grafica #1
   # Application title
-  #headerPanel("Fallecidos por año/mes"),
+  #headerPanel("Fallecidos por aÃ±o/mes"),
   
   # Sidebar with a slider input for number of observations
   #sidebarPanel(
   #  setSliderColor(c("DeepPink ", "#FF4500"), c(1, 2, 4)),
   #  sliderInput("year", 
-  #              "Años", 
+  #              "AÃ±os", 
    #             min = 2016,
   #              max = 2018, 
   #              value = 2017),
@@ -23,7 +23,7 @@ shinyUI(pageWithSidebar(
   #              value = 6)
   #),
   
-  headerPanel("Fallecidos por año"),
+  headerPanel("Fallecidos por aÃ±o"),
   #Grafica #2
   sidebarPanel(
     setSliderColor(c("DeepPink ", "#FF4500"), c(1, 2, 4)),
