@@ -51,6 +51,8 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
+  library(plotly)
+  library(lubridate)
   set.seed(122)
   histdata <- rnorm(500)
   
@@ -61,8 +63,6 @@ server <- function(input, output) {
   
   # Grafica de Jose
   output$plotAccidentes <- renderPlotly({
-    require(plotly)
-    library(lubridate)
     accidentes<-read.csv("./Data/HechoTransito.csv",header = TRUE,sep=",")
     accidentesPorMes<-as.data.frame(table(accidentes$mes_ocu,accidentes$año_ocu))
     accidentesPorMes<-accidentesPorMes[with(accidentesPorMes,order(accidentesPorMes$Var2)),]
