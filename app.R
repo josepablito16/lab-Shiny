@@ -57,9 +57,11 @@ ui <- dashboardPage(skin="yellow",
       tabItem(tabName = "datos",
               h2("Analisis de datos"),
               fluidRow(
-                box(title = "Mi nombre es Oscar",
-                    plotlyOutput("plotAccidentesPorMes", height = 250)
-                )
+                box(plotlyOutput("plotAccDep", height = 250), width = 12)
+              ),
+              fluidRow(
+                box(plotlyOutput("plotAccidentesPorMes", height = 250), width = 6),
+                box(plotlyOutput("plotFallLes", height = 250), width = 6)
               )
       ),
       
@@ -76,7 +78,7 @@ ui <- dashboardPage(skin="yellow",
                                 min = 0.1,
                                 max = 1, 
                                 value = 0.3),
-                  )
+                  ), width = 12
                 )
               ),
               fluidRow(
@@ -111,6 +113,10 @@ ui <- dashboardPage(skin="yellow",
 server <- function(input, output) {
   set.seed(122)
   histdata <- rnorm(500)
+  meses <- c("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre")
+  departamentos <- c("Guatemala", "El Progreso", "Sacatepéquez", "Chimaltenango", "Escuintla", "Santa Rosa", "Sololá", "Totonicapán", "Quetzaltenango", "Suchitepéquez", "Retalhuleu", "San Marcos", "Huehuetenango", "Quiché", "Baja Verapaz", "Alta Verapaz", "Petén", "Izabal", "Zacapa", "Chiquimula", "Jalapa", "Jutiapa")
+  accidentes<-read.csv("./Data/HechoTransito.csv",header = TRUE,sep=",")
+  accidentes <- filter(accidentes,accidentes$tipo_veh == 4)
   
   output$plot1 <- renderPlot({
     data <- histdata[seq_len(input$slider)]
@@ -118,10 +124,8 @@ server <- function(input, output) {
   })
   
   output$plotAccidentesPorMes <- renderPlotly({
-    accidentes<-read.csv("./Data/HechoTransito.csv",header = TRUE,sep=",")
-    accidentes <- filter(accidentes,accidentes$tipo_veh == 4)
     conteo <- plyr::count(accidentes[,c("mes_ocu")])
-    conteo$meses <- c("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre")
+    conteo$meses <- meses
     
     xform <- list(categoryorder = "array",
                   categoryarray = conteo$meses)
@@ -133,6 +137,41 @@ server <- function(input, output) {
       name = "SF Zoo",
       type = "bar"
     ) %>% layout(title = "Sumatoria de accidentes de motos mensuales (2016-2018)", xaxis = xform)
+    
+    plot1 <- fig
+  })
+  
+  output$plotAccDep <- renderPlotly({
+    municipiosAccidentes <- table(accidentes[,"depto_ocu"])
+    deptoOcuDesc <- municipiosAccidentes[order(municipiosAccidentes, decreasing = TRUE)]
+    
+    fig = plot_ly(
+      x = departamentos,
+      y = deptoOcuDesc,
+      type = "bar"
+    ) %>% layout(
+      title = "Sumatoria de accidentes de motos por depto. (2016-2018)",
+      xaxis = xform)
+    
+    plot1 <- fig
+  })
+  
+  output$plotFallLes <- renderPlotly({
+    fallecidos <- read.csv("./Data/FallecidosLesionados.csv",header = TRUE,sep=",")
+    fallecidos <- filter(fallecidos,fallecidos$tipo_veh == 4)
+    fallecidos <- filter(fallecidos, fallecidos$fall_les == 1)
+    
+    fallecidosPorAnio <- as.data.frame(table(fallecidos[,"año_ocu"]))
+    colnames(fallecidosPorAnio) <- c("Año", "Total")
+    
+    fig = plot_ly(
+      data = fallecidosPorAnio,
+      x = ~Año,
+      y = ~Total,
+      type = "bar"
+    ) %>% layout(
+      title = "Sumatoria de fallecidos de motos por año (2016-2018)",
+      xaxis = xform)
     
     plot1 <- fig
   })
