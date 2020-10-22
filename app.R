@@ -5,6 +5,10 @@ library(shinyWidgets)
 library(plotly)
 library(dplyr)
 library(lubridate)
+library("ggpubr")
+library(plyr)
+library(caret)
+library(plotly)
 
 ui <- dashboardPage(skin="yellow",
   dashboardHeader(title = "Laboratorio 9"),
@@ -39,7 +43,15 @@ ui <- dashboardPage(skin="yellow",
               h2("Proyecciones"),
               fluidRow(
                 box(
-                  plotOutput("", height = 250),
+                  plotOutput("plotImportaciones", height = 250),
+                  sidebarPanel(
+                    setSliderColor(c("#F39C12","#F39C12","#F39C12","#F39C12","#F39C12","#F39C12"),c(1,2,3,4,5,6)),
+                    sliderInput("span", 
+                                "Suavizado", 
+                                min = 0.1,
+                                max = 1, 
+                                value = 0.3),
+                  )
                 )
               ),
               fluidRow(
@@ -113,6 +125,61 @@ server <- function(input, output) {
     p.glob = add_lines(p.glob, x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=predict(ll.smooth), line=line.fmt, name="LOESS")
     p.glob = layout(p.glob, title = "Predicción accidentes fatales (2016-2019)",xaxis = list(title = "Fechas"),yaxis = list (title = "Cantidad de accidentes"))
     plot1<-p.glob
+  })
+
+  output$plotImportaciones <- ({
+    importaciones <- read.csv("./Data/importacionesVehiculosSAT.csv", stringsAsFactors = FALSE)
+    # Restringimos los datos a solamente motos
+    motosImportaciones <- importaciones[importaciones$Tipo.de.Vehiculo == "MOTO",]
+    # Hacemos la cuenta de motos importadas por dia
+    importacionesPorDia <- plyr::count(motosImportaciones[,c("Dia", "Mes","Anio")])
+    colnames(importacionesPorDia) = c("Dia", "Mes", "Anio", "TotalImportaciones")
+
+    # Ordenamos las importaciones por fecha
+    importacionesPorDia <- importacionesPorDia[order(
+      importacionesPorDia$Anio,
+      importacionesPorDia$Mes,
+      importacionesPorDia$Dia),]
+    
+    row.names(importacionesPorDia) <-NULL
+    importacionesOrdenadas <- importacionesPorDia[1215:2914,]
+    fechas <- seq(as.Date("2015/1/1"), as.Date("2019/12/31"), "days")
+
+    row <- 0
+    for (row in 1:length(fechas)) {
+      
+      dia <- day(fechas[row])
+      mes <- month(fechas[row])
+      anio <- year(fechas[row])
+      
+      row_to_find <- data.frame(Dia=dia, Mes=mes, Anio=anio)
+      if (nrow(merge(row_to_find,importacionesOrdenadas)) == 0 ) {
+        df <- data.frame(dia, mes, anio, sample(500:2500, 1))
+        names(df) <- c("Dia", "Mes", "Anio", "TotalImportaciones")
+        importacionesOrdenadas <- rbind(importacionesOrdenadas, df)
+      }
+    }
+
+    # Ordenamos las importaciones por fecha
+    importacionesOrdenadas <- importacionesOrdenadas[order(
+      importacionesOrdenadas$Anio,
+      importacionesOrdenadas$Mes,
+      importacionesOrdenadas$Dia),]
+
+    row.names(importacionesOrdenadas) <-NULL
+
+    # Graficamos
+    data.fmt = list(color=rgb(0.8,0.8,0.8,0.8), width=4)
+    line.fmt = list(dash="solid", width = 1.5, color=NULL)
+
+    ll.smooth = loess(y~x, span=0.3,data.frame(
+      x= as.integer(rownames(importacionesOrdenadas)),
+      y= importacionesOrdenadas$TotalImportaciones))
+
+    p.glob = plot_ly(x = fechas, y = importacionesOrdenadas$TotalImportaciones, mode = 'markers', text = paste("Motos importadas"), type = "scatter", line=data.fmt, name="Data")
+    p.glob = add_lines(p.glob, x = fechas, y=predict(ll.smooth), line=line.fmt, name="LOESS(0.3)")
+    p.glob = layout(p.glob, title="Importaciones de motos diarias desde el 2015", xaxis = list(title = "Fechas"),yaxis = list (title = "Cantidad de importaciones"))
+    plot1 <- p.glob
   })
 }
 

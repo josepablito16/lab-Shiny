@@ -4,22 +4,25 @@ library(plyr)
 library(caret)
 library(plotly)
 
-importaciones <- read.csv("./importacionesVehiculosSAT.csv", stringsAsFactors = FALSE)
+importaciones <- read.csv("./Data/importacionesVehiculosSAT.csv", stringsAsFactors = FALSE)
 
 # Restringimos los datos a solamente motos
 motosImportaciones <- importaciones[importaciones$Tipo.de.Vehiculo == "MOTO",]
 
 # Hacemos la cuenta de motos importadas por día
-importacionesPorDia <- count(motosImportaciones[,c("Dia", "Mes","Anio")])
+importacionesPorDia <- plyr::count(motosImportaciones[,c("Dia", "Mes","Anio")])
 colnames(importacionesPorDia) = c("Dia", "Mes", "Anio", "TotalImportaciones")
 
 # Ordenamos las importaciones por fecha
-importacionesOrdenadas <- importacionesPorDia[order(
+importacionesPorDia <- importacionesPorDia[order(
   importacionesPorDia$Anio,
   importacionesPorDia$Mes,
   importacionesPorDia$Dia),]
 
-importacionesOrdenadas <- importacionesOrdenadas[689:2388,]
+row.names(importacionesPorDia) <-NULL
+
+importacionesOrdenadas <- importacionesPorDia[1215:2914,]
+fechas <- seq(as.Date("2015/1/1"), as.Date("2019/12/31"), "days")
 
 row <- 0
 for (row in 1:length(fechas)) {
@@ -36,7 +39,6 @@ for (row in 1:length(fechas)) {
     
     importacionesOrdenadas <- rbind(importacionesOrdenadas, df)
   }
-
 }
 
 # Ordenamos las importaciones por fecha
