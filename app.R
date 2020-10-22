@@ -1,7 +1,12 @@
 ## app.R ##
 library(shinydashboard)
+library(shiny)
+library(shinyWidgets)
+library(plotly)
+library(dplyr)
+library(lubridate)
 
-ui <- dashboardPage(
+ui <- dashboardPage(skin="yellow",
   dashboardHeader(title = "Laboratorio 9"),
   dashboardSidebar(
     sidebarMenu(
@@ -39,10 +44,26 @@ ui <- dashboardPage(
               ),
               fluidRow(
                 box(
-                  plotOutput("", height = 250)
+                  plotlyOutput("distPlot", height = 250),
+                  sidebarPanel(
+                    setSliderColor("#F39C12",c(1,2,3,4,5,6)),
+                    sliderInput("span", 
+                                "Suavizado", 
+                                min = 0.1,
+                                max = 1, 
+                                value = 0.3),
+                  )
                 ),
                 box(
-                  plotlyOutput("plotAccidentes", height = 250)
+                  plotlyOutput("plotAccidentes", height =250),
+                  sidebarPanel(
+                    setSliderColor(c("#F39C12","#F39C12","#F39C12","#F39C12","#F39C12","#F39C12"),c(1,2,3,4,5,6)),
+                    sliderInput("span2", 
+                                "Suavizado", 
+                                min = 0.1,
+                                max = 1, 
+                                value = 0.3),
+                  )
                 )
               )
       )
@@ -61,8 +82,6 @@ server <- function(input, output) {
   
   # Grafica de Jose
   output$plotAccidentes <- renderPlotly({
-    require(plotly)
-    library(lubridate)
     accidentes<-read.csv("./Data/HechoTransito.csv",header = TRUE,sep=",")
     accidentesPorMes<-as.data.frame(table(accidentes$mes_ocu,accidentes$año_ocu))
     accidentesPorMes<-accidentesPorMes[with(accidentesPorMes,order(accidentesPorMes$Var2)),]
@@ -70,12 +89,29 @@ server <- function(input, output) {
     data.fmt = list(color=rgb(0.8,0.8,0.8,0.8), width=4)
     line.fmt = list(dash="solid", width = 1.5, color=NULL)
     
-    ll.smooth = loess(y~x, span=0.3,data.frame(x=as.integer(rownames(accidentesPorMes)),y=accidentesPorMes$Freq))
+    ll.smooth = loess(y~x, span=input$span2,data.frame(x=as.integer(rownames(accidentesPorMes)),y=accidentesPorMes$Freq))
     
-    #p.glob = plot_ly(x=as.integer(rownames(accidentesPorMes)), y=accidentesPorMes$Freq, type="scatter", mode="markers", line=data.fmt, name="Data")
     p.glob = plot_ly(x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=accidentesPorMes$Freq, type="scatter", mode="markers", line=data.fmt, name="Data")
-    p.glob = add_lines(p.glob, x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=predict(ll.smooth), line=line.fmt, name="LOESS(0.3)")
-    p.glob = layout(p.glob, title = "Accidentes de motos por mes")
+    p.glob = add_lines(p.glob, x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=predict(ll.smooth), line=line.fmt, name="LOESS")
+    p.glob = layout(p.glob, title = "Accidentes de motos por mes",xaxis = list(title = "Fechas"),yaxis = list (title = "Cantidad de accidentes"))
+    plot1<-p.glob
+  })
+  
+  output$distPlot <- renderPlotly({
+    accidentes<-read.csv("./Data/FallecidosLesionados.csv",header = TRUE,sep=",")
+    accidentes <- filter(accidentes,accidentes$año_ocu >= 2016)
+    
+    accidentesPorMes<-as.data.frame(table(accidentes$mes_ocu,accidentes$año_ocu))
+    accidentesPorMes<-accidentesPorMes[with(accidentesPorMes,order(accidentesPorMes$Var2)),]
+    
+    data.fmt = list(color=rgb(0.8,0.8,0.8,0.8), width=4)
+    line.fmt = list(dash="solid", width = 1.5, color=NULL)
+    
+    ll.smooth = loess(y~x, span=input$span,data.frame(x=as.integer(rownames(accidentesPorMes)),y=accidentesPorMes$Freq))
+    
+    p.glob = plot_ly(x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=accidentesPorMes$Freq, type="scatter", mode="markers", line=data.fmt, name="Data")
+    p.glob = add_lines(p.glob, x=seq(ymd("2016-1-1"), ymd("2018-12-1"), by = "months"), y=predict(ll.smooth), line=line.fmt, name="LOESS")
+    p.glob = layout(p.glob, title = "Predicción accidentes fatales (2016-2019)",xaxis = list(title = "Fechas"),yaxis = list (title = "Cantidad de accidentes"))
     plot1<-p.glob
   })
 }
