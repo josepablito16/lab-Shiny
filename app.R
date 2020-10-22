@@ -55,7 +55,12 @@ ui <- dashboardPage(skin="yellow",
       
       # Tab de datos
       tabItem(tabName = "datos",
-              h2("Analisis de datos")
+              h2("Analisis de datos"),
+              fluidRow(
+                box(title = "Mi nombre es Oscar",
+                    plotlyOutput("plotAccidentesPorMes", height = 250)
+                )
+              )
       ),
       
       # Tab de proyecciones
@@ -63,7 +68,7 @@ ui <- dashboardPage(skin="yellow",
               h2("Proyecciones"),
               fluidRow(
                 box(
-                  plotlyOutput("plotImportaciones", height = 250),
+                  plotlyOutput("plotImportaciones", height = 250, width = "100%"),
                   sidebarPanel(
                     setSliderColor(c("#F39C12","#F39C12","#F39C12","#F39C12","#F39C12","#F39C12"),c(1,2,3,4,5,6)),
                     sliderInput("span3", 
@@ -110,6 +115,26 @@ server <- function(input, output) {
   output$plot1 <- renderPlot({
     data <- histdata[seq_len(input$slider)]
     hist(data)
+  })
+  
+  output$plotAccidentesPorMes <- renderPlotly({
+    accidentes<-read.csv("./Data/HechoTransito.csv",header = TRUE,sep=",")
+    accidentes <- filter(accidentes,accidentes$tipo_veh == 4)
+    conteo <- plyr::count(accidentes[,c("mes_ocu")])
+    conteo$meses <- c("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre")
+    
+    xform <- list(categoryorder = "array",
+                  categoryarray = conteo$meses)
+    
+    fig = plot_ly(
+      data = conteo,
+      x = ~meses,
+      y = ~freq,
+      name = "SF Zoo",
+      type = "bar"
+    ) %>% layout(title = "Sumatoria de accidentes de motos mensuales (2016-2018)", xaxis = xform)
+    
+    plot1 <- fig
   })
   
   # Grafica de Jose
