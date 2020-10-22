@@ -43,10 +43,10 @@ ui <- dashboardPage(skin="yellow",
               h2("Proyecciones"),
               fluidRow(
                 box(
-                  plotOutput("plotImportaciones", height = 250),
+                  plotlyOutput("plotImportaciones", height = 250),
                   sidebarPanel(
                     setSliderColor(c("#F39C12","#F39C12","#F39C12","#F39C12","#F39C12","#F39C12"),c(1,2,3,4,5,6)),
-                    sliderInput("span", 
+                    sliderInput("span3", 
                                 "Suavizado", 
                                 min = 0.1,
                                 max = 1, 
@@ -127,7 +127,7 @@ server <- function(input, output) {
     plot1<-p.glob
   })
 
-  output$plotImportaciones <- ({
+  output$plotImportaciones <- renderPlotly({
     importaciones <- read.csv("./Data/importacionesVehiculosSAT.csv", stringsAsFactors = FALSE)
     # Restringimos los datos a solamente motos
     motosImportaciones <- importaciones[importaciones$Tipo.de.Vehiculo == "MOTO",]
@@ -172,12 +172,12 @@ server <- function(input, output) {
     data.fmt = list(color=rgb(0.8,0.8,0.8,0.8), width=4)
     line.fmt = list(dash="solid", width = 1.5, color=NULL)
 
-    ll.smooth = loess(y~x, span=0.3,data.frame(
+    ll.smooth = loess(y~x, span=input$span3,data.frame(
       x= as.integer(rownames(importacionesOrdenadas)),
       y= importacionesOrdenadas$TotalImportaciones))
 
     p.glob = plot_ly(x = fechas, y = importacionesOrdenadas$TotalImportaciones, mode = 'markers', text = paste("Motos importadas"), type = "scatter", line=data.fmt, name="Data")
-    p.glob = add_lines(p.glob, x = fechas, y=predict(ll.smooth), line=line.fmt, name="LOESS(0.3)")
+    p.glob = add_lines(p.glob, x = fechas, y=predict(ll.smooth), line=line.fmt, name="LOESS")
     p.glob = layout(p.glob, title="Importaciones de motos diarias desde el 2015", xaxis = list(title = "Fechas"),yaxis = list (title = "Cantidad de importaciones"))
     plot1 <- p.glob
   })
