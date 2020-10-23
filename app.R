@@ -11,103 +11,103 @@ library(caret)
 library(plotly)
 
 ui <- dashboardPage(skin="yellow",
-  dashboardHeader(title = "Laboratorio 9"),
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem("Inicio", tabName = "inicio", icon = icon("home")),
-      menuItem("Analisis de datos", tabName = "datos", icon = icon("table")),
-      menuItem("Proyecciones", tabName = "proyecciones", icon = icon("chart-bar"))
-    )
-  ),
-  dashboardBody(
-    tabItems(
-      # Tab de inicio
-      tabItem(tabName = "inicio",
-              
-              fluidPage(
-                
-                headerPanel("Visualización Dinámica Importación y Accidentes de tráfico en Guatemala"),
-                mainPanel(
-                  
-                  tags$div(
-                    tags$ul(
-                      tags$li("Paul Belches"),
-                      tags$li("José Cifuentes"),
-                      tags$li("Oscar Juárez")
-                    )
-                  ),
-                  p("Según el Instituto Nacional de Ciencias Forenses, la segunda mayor causa de muertes en Guatemala, son los accidentes 
+                    dashboardHeader(title = "Laboratorio 9"),
+                    dashboardSidebar(
+                      sidebarMenu(
+                        menuItem("Inicio", tabName = "inicio", icon = icon("home")),
+                        menuItem("Analisis de datos", tabName = "datos", icon = icon("table")),
+                        menuItem("Proyecciones", tabName = "proyecciones", icon = icon("chart-bar"))
+                      )
+                    ),
+                    dashboardBody(
+                      tabItems(
+                        # Tab de inicio
+                        tabItem(tabName = "inicio",
+                                
+                                fluidPage(
+                                  
+                                  headerPanel("Visualización Dinámica Importación y Accidentes de tráfico en Guatemala"),
+                                  mainPanel(
+                                    
+                                    tags$div(
+                                      tags$ul(
+                                        tags$li("Paul Belches"),
+                                        tags$li("José Cifuentes"),
+                                        tags$li("Oscar Juárez")
+                                      )
+                                    ),
+                                    p("Según el Instituto Nacional de Ciencias Forenses, la segunda mayor causa de muertes en Guatemala, son los accidentes 
       de tránsito. En 2018, en las calles y carreteras del país, ocurrieron diariamente alrededor de 17 accidentes de tránsito,
       que resultaron en la defunción de los implicados (1). Conforme la población del país aumente, lo mismo sucederá con la
       demanda de vehículos, lo cual incrementará la cantidad de estos circulando por las calles. Tomando esto en cuenta, es 
       razonable asumir, que la cantidad de accidentes crecerá proporcionalmente a la cantidad de personas conduciendo en el país.
       ",align = "justify"),
-                  p("A continuación, se presenta una serie de visualizaciones interactivas que buscan proveer soporte a aquellos que 
+                                    p("A continuación, se presenta una serie de visualizaciones interactivas que buscan proveer soporte a aquellos que 
       estén interesados en conocer los fenómenos antes descritos. Se realizo un enfoque en el estudio de las motocicletas 
       en específico por su naturaleza, más vulnerable. Utilizando las importaciones anules y los accidentes de transito 
       como base. ",align = "justify"),
-                  p("(1) Ola, A. (12/01/2019) Accidentes de tránsito son la segunda causa de muerte en el país. Prensa Libre",font = "italic")
-                )
-              )
-              
-              
-      ),
-      
-      # Tab de datos
-      tabItem(tabName = "datos",
-              h2("Analisis de datos"),
-              fluidRow(
-                box(plotlyOutput("plotAccDep", height = 250), width = 12)
-              ),
-              fluidRow(
-                box(plotlyOutput("plotAccidentesPorMes", height = 250), width = 6),
-                box(plotlyOutput("plotFallLes", height = 250), width = 6)
-              )
-      ),
-      
-      # Tab de proyecciones
-      tabItem(tabName = "proyecciones",
-              h2("Proyecciones"),
-              fluidRow(
-                box(
-                  plotlyOutput("plotImportaciones", height = 250, width = "100%"),
-                  sidebarPanel(
-                    setSliderColor(c("#F39C12","#F39C12","#F39C12","#F39C12","#F39C12","#F39C12"),c(1,2,3,4,5,6)),
-                    sliderInput("span3", 
-                                "Suavizado", 
-                                min = 0.1,
-                                max = 1, 
-                                value = 0.3),
-                  ), width = 12
-                )
-              ),
-              fluidRow(
-                box(
-                  plotlyOutput("distPlot", height = 250),
-                  sidebarPanel(
-                    setSliderColor("#F39C12",c(1,2,3,4,5,6)),
-                    sliderInput("span", 
-                                "Suavizado", 
-                                min = 0.1,
-                                max = 1, 
-                                value = 0.3),
-                  )
-                ),
-                box(
-                  plotlyOutput("plotAccidentes", height =250),
-                  sidebarPanel(
-                    setSliderColor(c("#F39C12","#F39C12","#F39C12","#F39C12","#F39C12","#F39C12"),c(1,2,3,4,5,6)),
-                    sliderInput("span2", 
-                                "Suavizado", 
-                                min = 0.1,
-                                max = 1, 
-                                value = 0.3),
-                  )
-                )
-              )
-      )
-    )
-  )
+                                    p("(1) Ola, A. (12/01/2019) Accidentes de tránsito son la segunda causa de muerte en el país. Prensa Libre",font = "italic")
+                                  )
+                                )
+                                
+                                
+                        ),
+                        
+                        # Tab de datos
+                        tabItem(tabName = "datos",
+                                h2("Analisis de datos"),
+                                fluidRow(
+                                  box(plotlyOutput("plotAccDep", height = 250), width = 12)
+                                ),
+                                fluidRow(
+                                  box(plotlyOutput("plotAccidentesPorMes", height = 250), width = 6),
+                                  box(plotlyOutput("plotFallLes", height = 250), width = 6)
+                                )
+                        ),
+                        
+                        # Tab de proyecciones
+                        tabItem(tabName = "proyecciones",
+                                h2("Proyecciones"),
+                                fluidRow(
+                                  box(
+                                    plotlyOutput("plotImportaciones", height = 250, width = "100%"),
+                                    sidebarPanel(
+                                      setSliderColor(c("#F39C12","#F39C12","#F39C12","#F39C12","#F39C12","#F39C12"),c(1,2,3,4,5,6)),
+                                      sliderInput("span3", 
+                                                  "Suavizado", 
+                                                  min = 0.1,
+                                                  max = 1, 
+                                                  value = 0.3),
+                                    ), width = 12
+                                  )
+                                ),
+                                fluidRow(
+                                  box(
+                                    plotlyOutput("distPlot", height = 250),
+                                    sidebarPanel(
+                                      setSliderColor("#F39C12",c(1,2,3,4,5,6)),
+                                      sliderInput("span", 
+                                                  "Suavizado", 
+                                                  min = 0.1,
+                                                  max = 1, 
+                                                  value = 0.3),
+                                    )
+                                  ),
+                                  box(
+                                    plotlyOutput("plotAccidentes", height =250),
+                                    sidebarPanel(
+                                      setSliderColor(c("#F39C12","#F39C12","#F39C12","#F39C12","#F39C12","#F39C12"),c(1,2,3,4,5,6)),
+                                      sliderInput("span2", 
+                                                  "Suavizado", 
+                                                  min = 0.1,
+                                                  max = 1, 
+                                                  value = 0.3),
+                                    )
+                                  )
+                                )
+                        )
+                      )
+                    )
 )
 
 server <- function(input, output) {
@@ -145,6 +145,13 @@ server <- function(input, output) {
     municipiosAccidentes <- table(accidentes[,"depto_ocu"])
     deptoOcuDesc <- municipiosAccidentes[order(municipiosAccidentes, decreasing = TRUE)]
     
+    conteo <- plyr::count(accidentes[,c("mes_ocu")])
+    conteo$meses <- meses
+    
+    xform <- list(categoryorder = "array",
+                  categoryarray = conteo$meses)
+    
+    
     fig = plot_ly(
       x = departamentos,
       y = deptoOcuDesc,
@@ -160,6 +167,12 @@ server <- function(input, output) {
     fallecidos <- read.csv("./Data/FallecidosLesionados.csv",header = TRUE,sep=",")
     fallecidos <- filter(fallecidos,fallecidos$tipo_veh == 4)
     fallecidos <- filter(fallecidos, fallecidos$fall_les == 1)
+    
+    conteo <- plyr::count(accidentes[,c("mes_ocu")])
+    conteo$meses <- meses
+    
+    xform <- list(categoryorder = "array",
+                  categoryarray = conteo$meses)
     
     fallecidosPorAnio <- as.data.frame(table(fallecidos[,"año_ocu"]))
     colnames(fallecidosPorAnio) <- c("Año", "Total")
@@ -212,7 +225,7 @@ server <- function(input, output) {
     p.glob = layout(p.glob, title = "Predicción accidentes fatales (2016-2019)",xaxis = list(title = "Fechas"),yaxis = list (title = "Cantidad de accidentes"))
     plot1<-p.glob
   })
-
+  
   output$plotImportaciones <- renderPlotly({
     importaciones <- read.csv("./Data/importacionesVehiculosSAT.csv", stringsAsFactors = FALSE)
     # Restringimos los datos a solamente motos
@@ -220,7 +233,7 @@ server <- function(input, output) {
     # Hacemos la cuenta de motos importadas por dia
     importacionesPorDia <- plyr::count(motosImportaciones[,c("Dia", "Mes","Anio")])
     colnames(importacionesPorDia) = c("Dia", "Mes", "Anio", "TotalImportaciones")
-
+    
     # Ordenamos las importaciones por fecha
     importacionesPorDia <- importacionesPorDia[order(
       importacionesPorDia$Anio,
@@ -230,7 +243,7 @@ server <- function(input, output) {
     row.names(importacionesPorDia) <-NULL
     importacionesOrdenadas <- importacionesPorDia[1215:2914,]
     fechas <- seq(as.Date("2015/1/1"), as.Date("2019/12/31"), "days")
-
+    
     row <- 0
     for (row in 1:length(fechas)) {
       
@@ -245,23 +258,23 @@ server <- function(input, output) {
         importacionesOrdenadas <- rbind(importacionesOrdenadas, df)
       }
     }
-
+    
     # Ordenamos las importaciones por fecha
     importacionesOrdenadas <- importacionesOrdenadas[order(
       importacionesOrdenadas$Anio,
       importacionesOrdenadas$Mes,
       importacionesOrdenadas$Dia),]
-
+    
     row.names(importacionesOrdenadas) <-NULL
-
+    
     # Graficamos
     data.fmt = list(color=rgb(0.8,0.8,0.8,0.8), width=4)
     line.fmt = list(dash="solid", width = 1.5, color=NULL)
-
+    
     ll.smooth = loess(y~x, span=input$span3,data.frame(
       x= as.integer(rownames(importacionesOrdenadas)),
       y= importacionesOrdenadas$TotalImportaciones))
-
+    
     p.glob = plot_ly(x = fechas, y = importacionesOrdenadas$TotalImportaciones, mode = 'markers', text = paste("Motos importadas"), type = "scatter", line=data.fmt, name="Data")
     p.glob = add_lines(p.glob, x = fechas, y=predict(ll.smooth), line=line.fmt, name="LOESS")
     p.glob = layout(p.glob, title="Importaciones de motos diarias desde el 2015", xaxis = list(title = "Fechas"),yaxis = list (title = "Cantidad de importaciones"))
