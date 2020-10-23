@@ -46,7 +46,8 @@ ui <- dashboardPage(skin="yellow",
       estén interesados en conocer los fenómenos antes descritos. Se realizo un enfoque en el estudio de las motocicletas 
       en específico por su naturaleza, más vulnerable. Utilizando las importaciones anules y los accidentes de transito 
       como base. ",align = "justify"),
-                                    p("(1) Ola, A. (12/01/2019) Accidentes de tránsito son la segunda causa de muerte en el país. Prensa Libre",font = "italic")
+                                    p("(1) Ola, A. (12/01/2019) Accidentes de tránsito son la segunda causa de muerte en el país. Prensa Libre",font = "italic"),
+                                    p("DISCLAIMER: Los archivos CSV usados en la aplicación son muy amplios, puede que estos tarden en cargar... Sea paciente.",font = "bold")
                                   )
                                 )
                                 
@@ -56,13 +57,23 @@ ui <- dashboardPage(skin="yellow",
                         # Tab de datos
                         tabItem(tabName = "datos",
                                 h2("Analisis de datos"),
+                                p("Primero, se presenta un resumen de los datos utilizados. Estos datos son los obtenidos de la INE y la SAT y 
+                                  su función es ver ciertas caracterísitcas estadísticas con facilidad."),
+                                fluidRow(
+                                  box(title = "Resúmen de hechos de tránsito", verbatimTextOutput("sumAccidentes"), width = 6),
+                                  box(title = "Resúmen de fallecidos y lesionados", verbatimTextOutput("sumFallecidos"), width = 6)
+                                ),
+                                fluidRow(
+                                  box(title = "Resúmen de importaciones", verbatimTextOutput("sumImportaciones"), width = 6)
+                                ),
+                                p("Ahora, podemos mostrar unas cuántas gráficas interactivas que nos sirven para explorar los datos."),
                                 fluidRow(
                                   box(plotlyOutput("plotAccDep", height = 250), width = 12)
                                 ),
                                 fluidRow(
                                   box(plotlyOutput("plotAccidentesPorMes", height = 250), width = 6),
                                   box(plotlyOutput("plotFallLes", height = 250), width = 6)
-                                )
+                                ),
                         ),
                         
                         # Tab de proyecciones
@@ -121,6 +132,26 @@ server <- function(input, output) {
   output$plot1 <- renderPlot({
     data <- histdata[seq_len(input$slider)]
     hist(data)
+  })
+  
+  output$sumAccidentes <- renderPrint({
+    summary(accidentes)
+  })
+  
+  output$sumFallecidos <- renderPrint({
+    fallecidos <- read.csv("./Data/FallecidosLesionados.csv",header = TRUE,sep=",")
+    fallecidos <- filter(fallecidos,fallecidos$tipo_veh == 4)
+    fallecidos <- filter(fallecidos, fallecidos$fall_les == 1)
+    
+    summary(fallecidos)
+  })
+  
+  output$sumImportaciones <- renderPrint({
+    importaciones <- read.csv("./Data/importacionesVehiculosSAT.csv", stringsAsFactors = FALSE)
+    # Restringimos los datos a solamente motos
+    motosImportaciones <- importaciones[importaciones$Tipo.de.Vehiculo == "MOTO",]
+    
+    summary(importaciones)
   })
   
   output$plotAccidentesPorMes <- renderPlotly({
