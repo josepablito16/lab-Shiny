@@ -179,6 +179,7 @@ server <- function(input, output) {
   # Grafica de Jose
   output$plotAccidentes <- renderPlotly({
     accidentes<-read.csv("./Data/HechoTransito.csv",header = TRUE,sep=",")
+    accidentes<-accidentes[accidentes$tipo_veh==4,]
     accidentesPorMes<-as.data.frame(table(accidentes$mes_ocu,accidentes$año_ocu))
     accidentesPorMes<-accidentesPorMes[with(accidentesPorMes,order(accidentesPorMes$Var2)),]
     
@@ -195,6 +196,7 @@ server <- function(input, output) {
   
   output$distPlot <- renderPlotly({
     accidentes<-read.csv("./Data/FallecidosLesionados.csv",header = TRUE,sep=",")
+    accidentes<-accidentes[accidentes$tipo_veh==4,]
     accidentes <- filter(accidentes,accidentes$año_ocu >= 2016)
     
     accidentesPorMes<-as.data.frame(table(accidentes$mes_ocu,accidentes$año_ocu))
